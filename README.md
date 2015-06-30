@@ -38,3 +38,6 @@ Respond to events:
   // do something
 }
 ```
+
+Brief explanation at : http://00steveng.github.io/KCCScrollViewContext
+

@@ -1,0 +1,140 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>KCCScrollViewContext by 00StevenG</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>KCCScrollViewContext</h1>
+        <p></p>
+
+        <p class="view"><a href="https://github.com/00StevenG/KCCScrollViewContext">View the Project on GitHub <small>00StevenG/KCCScrollViewContext</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/00StevenG/KCCScrollViewContext/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/00StevenG/KCCScrollViewContext/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/00StevenG/KCCScrollViewContext">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <p>UIScrollView is an indispensable class for iOS development. If you're not using UIScrollView, you're likely using one of it's subclasses (such as UITableView, UICollectionView or UITextView) and implementing its delegate protocol (UIScrollViewDelegate) or extended delegates (such as UITableViewDelegate or  UITextViewDelegate). I often implement methods to calculate UIScrollView state or position. The logical place is the view controller instance presenting the scroll view. It may look something like this:</p>
+
+<pre><code>@interface ViewControlller 
+
+// scrolling state
+@property (nonatomic, readwrtie, asssign) BOOL isScrolling;
+
+@end 
+</code></pre>
+
+<p>Rather than do this again and again (see <a href="https://en.wikipedia.org/wiki/Don't_repeat_yourself">DRY</a>) ), I’ve created a KCCScrollViewContext.</p>
+
+<p>KCCScrollViewContext provides additional UIScrollView state and expands upon UIScrollViewDelegate. It’s simple to add and works with existing messaging from UIScrollViewDelegate and its extended protocols. It features :</p>
+
+<ul>
+<li>accessors like isScrolling, isAnimating, and current scrolling direction (UIRectEdge) </li>
+<li>accessors to contentOffset values during scrolling events (scrollingBeganOffset , expectedScrollingEndOffset, scrollingEndedOffset) </li>
+<li>additional delegate callbacks with content offsets for ‘will scroll’ (calculated)  and ‘did scroll’ (actual),  </li>
+<li>additional delegate callbacks for ‘will scroll’ and ‘did scroll’ events with content edge detection (UIRectEdge) and scrollview bounce events. </li>
+<li>completion block handlers for UIScrollView’s built in animated methods (setContentOffset:animated: / scrollRectToVisible:animated:) </li>
+<li>additional zooming callbacks when the user initiates zooming at and past the minimum or maximum zoom scale. </li>
+<li>UIScrollViewDelegate and it’s extended protocols (UITableViewDelegate and so on) methods are forwarded to the original delegate (such as UITableViewController). </li>
+</ul>
+
+<p>How to use:</p>
+
+<pre><code>- (void)viewDidLoad {
+    [super viewDidLoad];    
+    self.scrollContext = [[KCCScrollViewContext alloc]initWithScrollView:self.tableView andDelegate:self];
+}
+</code></pre>
+
+<p>Init:</p>
+
+<p>KCCScrollViewContext servers as the passed UIScrollView instance’s delegate. It also adds an additional handler to scrollView’s pan gesture to keep track of the most recent tracking point.</p>
+
+<pre><code>- (instancetype)initWithScrollView:(UIScrollView*)scrollView andDelegate:(id&lt;KCCScrollViewContextDelegate&gt;)delegate {  
+    if ([super init]) {
+        _scrollDelegate = delegate;
+        _scrollView = scrollView;
+        _scrollView.delegate = self;
+        _lastContentOffset = _scrollView.contentOffset;
+        [_scrollView.panGestureRecognizer addTarget:self action:@selector(scrollViewPanGestureHandler:)];
+    }
+    return self;
+}
+</code></pre>
+
+<p>Messaging:</p>
+
+<p>KCCScrollViewContext works with existing delegate instances by using Objective-C’s dyanmic messaging feature. It overrides two NSObject methods</p>
+
+<ul>
+<li>respondsToSelector: </li>
+<li>forwardingTargetForSelector: </li>
+</ul>
+
+<p>When the context is reassigned as the delegate. UIScrollView subclasses such as UITableView check which methods the object responds to by calling respondsToSelector. So the context’s implementation of this method checks itself and it’s delegate.</p>
+
+<pre><code>- (BOOL)respondsToSelector:(SEL)aSelector {
+
+    BOOL result = [super respondsToSelector:aSelector];
+    if (!result) {
+        result = [self.scrollDelegate respondsToSelector:aSelector];
+    }
+    return result;
+}
+</code></pre>
+
+<p>When the context is sent a message for a method not implemented (such as in response to UITableView row selection), forwardingTargetForSelector is an opportunity to provide an object that can. In this case the context’s delegate.</p>
+
+<pre><code>- (id)forwardingTargetForSelector:(SEL)aSelector {
+
+    if ([self.scrollDelegate respondsToSelector:aSelector]) {
+        return self.scrollDelegate;
+    }
+    return [super forwardingTargetForSelector:aSelector];
+}
+</code></pre>
+
+<p>For UIScrollViewDelegate methods implemented by the context (such as scrollViewDidScroll:). The context first updates it’s internal logic and state and then forwards the original invocation to the delegate as seen here.</p>
+
+<pre><code>- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
+
+    self.isScrolling = YES;
+    [self sendScroll:scrollView messageIfNeeded:_cmd];
+}
+
+- (void)sendScroll:(UIScrollView *)scroll messageIfNeeded:(SEL)message {
+
+    if ([self.scrollDelegate respondsToSelector:message]) {
+#       pragma clang diagnostic push
+#       pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+        [self.scrollDelegate performSelector:message withObject:scroll];
+#       pragma clang diagnostic pop
+    }
+}
+</code></pre>
+
+<p>The remainder of the context code is simply calculations and state management by responding to scroll view events.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/00StevenG">00StevenG</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>

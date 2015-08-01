@@ -22,16 +22,16 @@
 
 // Max contentOffset calculated from the ContentSize and ScrollView Frame
 @property (nonatomic, readonly, assign) CGPoint maxOffset;
-// YES when scrolling be user interaction or animated
+// YES when scrolling because of user interaction or animation
 @property (nonatomic, readonly, assign) BOOL isScrolling;
-// YES when using UIScrollView's animation methods
+// YES when using the UIScrollView animation methods
 @property (nonatomic, readonly, assign) BOOL isAnimating;
 
-// last recorded location of the ScrllView's panGesture
+// last recorded location of the UIScrollView panGesture
 @property (nonatomic, readonly ,assign) CGPoint lastKnownTrackingPoint;
 
 
-/* Calcuated Scrolling Points */
+/* Calculated Scrolling Points */
 
 // set when the user begins dragging
 @property (nonatomic, readonly, assign) CGPoint scrollingBeganOffset;
@@ -61,7 +61,7 @@
 - (void)scrollRectToVisible:(CGRect)rect animated:(BOOL)animated complete:(void (^)(void))complete;
 
 
-// Margin for a given point and edge in the UIScrollView's space including contentInset
+// Margin for a given point and edge in the UIScrollView space including contentInset
 - (CGFloat)contentMarginForOffset:(CGPoint)point fromEdge:(UIRectEdge)edge;
 
 @end
@@ -86,7 +86,7 @@
 
 /* Bounce */
 
-// called before UIScrollView's deceleration begins and UIScrollView will bounce in respose to the calculated offset
+// called before UIScrollView deceleration begins and UIScrollView will 'bounce' in respose to the calculated offset
 - (void)scrollViewWillBounce:(KCCScrollViewContext *)context toEdge:(UIRectEdge)edge;
 // called after UIScrollView stopped scrolling and after a 'bounce'
 - (void)scrollViewDidBounce:(KCCScrollViewContext *)context fromEdge:(UIRectEdge)edge;

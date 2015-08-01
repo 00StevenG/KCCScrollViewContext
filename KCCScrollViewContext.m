@@ -14,7 +14,6 @@
 
 @property (nonatomic, readwrite ,weak) UIScrollView *scrollView;
 
-
 @property (nonatomic, readwrite, assign) BOOL isScrolling;
 @property (nonatomic, readwrite, assign) BOOL isAnimating;
 
@@ -29,13 +28,12 @@
 @property (nonatomic, readwrite, assign) CGPoint lastContentOffset;
 @property (nonatomic, readwrite, assign) CGPoint scrollingVelocity;
 
-
 @property (nonatomic, readwrite ,assign) UIRectEdge scrollingToHorizontalEdge;
 @property (nonatomic, readwrite ,assign) UIRectEdge scrollingToVerticalEdge;
 
 @property (nonatomic, readwrite ,assign) CGFloat zoomingBeganScale;
 
-@property (nonatomic, readwrite ,assign) UIRectEdge bouningEdge;
+@property (nonatomic, readwrite ,assign) UIRectEdge bouncingEdge;
 
 @end
 
@@ -57,7 +55,7 @@
     
 }
 
-- (void)dealloc{
+- (void)dealloc {
     
     [_scrollView.panGestureRecognizer removeTarget:self action:@selector(scrollViewPanGestureHandler:)];
 }
@@ -90,7 +88,6 @@
     return [super forwardingTargetForSelector:aSelector];
 }
 
-
 #pragma mark - Setters 
 
 - (void)setIsScrolling:(BOOL)isScrolling {
@@ -106,7 +103,7 @@
     self.scrollingToHorizontalEdge = UIRectEdgeNone;
     self.scrollingToVerticalEdge = UIRectEdgeNone;
     
-    self.bouningEdge = UIRectEdgeNone;
+    self.bouncingEdge = UIRectEdgeNone;
     
     if (_isScrolling) {
         self.expectedScrollingEndOffset = CGPointMake(NAN,NAN);
@@ -193,7 +190,7 @@
         return;
     }
     
-    self.bouningEdge = edge;
+    self.bouncingEdge = edge;
     
     [self.scrollDelegate scrollViewWillBounce:self toEdge:edge];
 }
@@ -228,7 +225,6 @@
     }
     return 0;
 }
-
 
 - (void)setContentOffset:(CGPoint)offset animated:(BOOL)animated complete:(void (^)(void))complete {
  
@@ -314,9 +310,9 @@
 
     
     // check before setting scrollingIvar
-    if (self.bouningEdge != UIRectEdgeNone) {
+    if (self.bouncingEdge != UIRectEdgeNone) {
         if ([self.scrollDelegate respondsToSelector:@selector(scrollViewDidBounce:fromEdge:)]) {
-            [self.scrollDelegate scrollViewDidBounce:self fromEdge:self.bouningEdge];
+            [self.scrollDelegate scrollViewDidBounce:self fromEdge:self.bouncingEdge];
         }
     }
     

@@ -8,7 +8,7 @@ KCCScrollViewContext provides additional UIScrollView state and expands upon UIS
 * additional delegate callbacks for ‘will scroll’ and ‘did scroll’ events with content edge detection (UIRectEdge) and scrollview bounce events. 
 * completion block handlers for UIScrollView’s built in animated methods (setContentOffset:animated: / scrollRectToVisible:animated:) 
 * additional zooming callbacks when the user initiates zooming at and past the minimum or maximum zoom scale. 
-* UIScrollViewDelegate and it’s extended protocols (UITableViewDelegate and so on) methods are forwarded to the original delegate (such as UITableViewController). 
+* UIScrollViewDelegate and its extended protocols (UITableViewDelegate and so on) methods are forwarded to the original delegate (such as UITableViewController). 
 
 How to use:
 
